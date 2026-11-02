@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pawn Hunt</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#17181c">
+<link rel="icon" href="icons/icon-192.png">
+<style>
+:root{--bg:#f4f1ea;--fg:#1d1d1f;--cell:#e4dfd2;--cell2:#d6d0c0;--pawn:#2563eb;--enemy:#dc2626;--star:#d97706;--btn:#fff;--bd:#bbb;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17181c;--fg:#eee;--cell:#2a2c33;--cell2:#32353d;--pawn:#60a5fa;--enemy:#f87171;--star:#fbbf24;--btn:#2a2c33;--bd:#555}}
+:root[data-theme="dark"]{--bg:#17181c;--fg:#eee;--cell:#2a2c33;--cell2:#32353d;--pawn:#60a5fa;--enemy:#f87171;--star:#fbbf24;--btn:#2a2c33;--bd:#555}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,sans-serif}
+main{max-width:420px;margin:0 auto;padding:12px;text-align:center}
+h1{font-size:22px;margin:6px 0}
+#info{display:flex;justify-content:space-between;font-size:15px;margin-bottom:8px}
+#board{display:grid;grid-template-columns:repeat(9,1fr);gap:2px;aspect-ratio:1;touch-action:manipulation}
+.c{background:var(--cell);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:clamp(14px,6vw,26px)}
+.c:nth-child(even){background:var(--cell2)}
+#pad{display:grid;grid-template-columns:repeat(3,64px);gap:6px;justify-content:center;margin:12px 0}
+#pad button{height:56px;font-size:22px;background:var(--btn);color:var(--fg);border:1px solid var(--bd);border-radius:10px}
+#pad button:disabled{opacity:.25}
+#msg{min-height:24px;font-weight:600}
+#restart{padding:8px 18px;border-radius:8px;border:1px solid var(--bd);background:var(--btn);color:var(--fg);font-size:15px}
+</style>
+</head>
+<body>
+<main>
+<h1>♟ Pawn Hunt</h1>
+<div id="info"><span>⭐ <b id="sc">0</b></span><span id="lv">Level 1</span><span>Best: <b id="best">0</b></span></div>
+<div id="board"></div>
+<div id="msg"></div>
+<div id="pad"></div>
+<button id="restart">Restart</button>
+<p style="font-size:13px;opacity:.7">Arrows/WASD. Diagonals (Q E Z C) mo-open pagkahuman og 5 stars.</p>
+</main>
+<script>
+const N=9;
+let p,e,s,score,level,over,best=0;
+const board=document.getElementById('board'),pad=document.getElementById('pad');
+try{best=+localStorage.getItem('pawnBest')||0}catch(_){}
+const dirs=[[-1,-1,'↖',1],[0,-1,'↑',0],[1,-1,'↗',1],[-1,0,'←',0],[0,0,'',0],[1,0,'→',0],[-1,1,'↙',1],[0,1,'↓',0],[1,1,'↘',1]];
+dirs.forEach(([dx,dy,t,diag])=>{const b=document.createElement('button');b.textContent=t;if(!t)b.style.visibility='hidden';b.dataset.diag=diag;b.onclick=()=>move(dx,dy);pad.appendChild(b)});
+const rnd=()=>[Math.floor(Math.random()*N),Math.floor(Math.random()*N)];
+const same=(a,b)=>a[0]===b[0]&&a[1]===b[1];
+function newStar(){do{s=rnd()}while(same(s,p)||same(s,e))}
+function reset(){p=[0,0];e=[N-1,N-1];score=0;level=1;over=false;newStar();document.getElementById('msg').textContent='';draw()}
+function draw(){
+ board.innerHTML='';
+ for(let y=0;y<N;y++)for(let x=0;x<N;x++){const c=document.createElement('div');c.className='c';
+  const at=[x,y];
+  if(same(at,p))c.textContent='♟',c.style.color='var(--pawn)';
+  else if(same(at,e))c.textContent='👾';
+  else if(same(at,s))c.textContent='⭐';
+  board.appendChild(c)}
+ document.getElementById('sc').textContent=score;
+ document.getElementById('lv').textContent='Level '+level;
+ document.getElementById('best').textContent=best;
+ pad.querySelectorAll('button').forEach(b=>b.disabled=(b.dataset.diag==='1'&&level<2)||over);
+}
+function move(dx,dy){
+ if(over)return;
+ if(dx&&dy&&level<2)return;
+ const nx=p[0]+dx,ny=p[1]+dy;
+ if(nx<0||ny<0||nx>=N||ny>=N)return;
+ p=[nx,ny];
+ if(same(p,e))return end();
+ if(same(p,s)){score++;if(score%5===0){level++;document.getElementById('msg').textContent='LEVEL UP! Diagonal na!'}newStar();
+  if(score>best){best=score;try{localStorage.setItem('pawnBest',best)}catch(_){}}}
+ // enemy random move, like make_move()
+ const m=[[0,1],[0,-1],[1,0],[-1,0]].filter(([a,b])=>{const x=e[0]+a,y=e[1]+b;return x>=0&&y>=0&&x<N&&y<N});
+ const [a,b]=m[Math.floor(Math.random()*m.length)];
+ e=[e[0]+a,e[1]+b];
+ if(same(e,p))return end();
+ if(same(e,s))newStar();
+ draw();
+}
+function end(){over=true;draw();document.getElementById('msg').textContent='Game over! Score: '+score}
+addEventListener('keydown',ev=>{
+ const k={ArrowUp:[0,-1],w:[0,-1],ArrowDown:[0,1],s:[0,1],ArrowLeft:[-1,0],a:[-1,0],ArrowRight:[1,0],d:[1,0],q:[-1,-1],e:[1,-1],z:[-1,1],c:[1,1]}[ev.key];
+ if(k){ev.preventDefault();move(...k)}});
+document.getElementById('restart').onclick=reset;
+reset();
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+</script>
+</body>
+</html>
