@@ -1,16 +1,19 @@
 {
   "name": "Pawn Hunt",
   "short_name": "Pawn Hunt",
-  "id": "./",
-  "start_url": "./index.html",
-  "scope": "./",
+  "description": "Retro arcade maze game. Collect stars, dodge monsters, and survive with 3 lives. A new monster appears every level.",
+  "id": "/my-game/",
+  "start_url": "/my-game/index.html",
+  "scope": "/my-game/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#17181c",
-  "theme_color": "#17181c",
+  "lang": "en",
+  "categories": ["games", "entertainment"],
+  "background_color": "#0b0b14",
+  "theme_color": "#0b0b14",
   "icons": [
-    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
-    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
-    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
   ]
 }
