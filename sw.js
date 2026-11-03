@@ -1,45 +1,5 @@
-
-const C = 'pawn-hunt-v7';
-
-const F = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
-];
-
-// Install and cache app files
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(C).then(cache => cache.addAll(F))
-  );
-
-  self.skipWaiting();
-});
-
-// Activate and remove old caches
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys
-          .filter(key => key !== C)
-          .map(key => caches.delete(key))
-      )
-    )
-  );
-
-  self.clients.claim();
-});
-
-// Fetch with offline cache support
-self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return;
-
-  event.respondWith(
-    caches.match(event.request).then(cached => {
-      return cached || fetch(event.request);
-    })
-  );
-});
+const C='pawn-hunt-v6';
+const F=['./','./index.html','./manifest.json','./icons/icon-192.png','./icons/icon-512.png'];
+self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(F)));self.skipWaiting()});
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x)))));self.clients.claim()});
+self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)))});
